@@ -4,21 +4,18 @@
 #include <iomanip>
 #include <limits>
 
-// Estrutura para representar um processo
 struct Processo {
     int id;
     int tempoChegada;
     int tempoExecucao;
     int prioridade;
 
-    // Variáveis para simulação e resultados
     int tempoRestante;
     int tempoConclusao = 0;
     int tempoTurnaround = 0;
     int tempoEspera = 0;
 };
 
-// Protótipos das funções
 void imprimirResultados(const std::vector<Processo>& processos);
 std::vector<Processo> obterEntradaUsuario();
 void executarFCFS(std::vector<Processo> processos);
@@ -29,7 +26,6 @@ void executarRoundRobin(std::vector<Processo> processos);
 int main() {
     int escolha;
     do {
-        // --- MENU PRINCIPAL ---
         std::cout << "\n============================================\n";
         std::cout << "    SIMULADOR DE ALGORITMOS DE ESCALONAMENTO\n";
         std::cout << "============================================\n";
@@ -48,7 +44,7 @@ int main() {
              std::cout << "Entrada invalida. Por favor, insira um numero entre 0 e 6.\n";
              std::cin.clear();
              std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-             escolha = -1; // Força a continuação do loop
+             escolha = -1;
              continue;
         }
 
@@ -60,16 +56,16 @@ int main() {
                     executarFCFS(processos);
                     break;
                 case 2:
-                    executarSJF(processos, false); // Nao Preemptivo
+                    executarSJF(processos, false); 
                     break;
                 case 3:
-                    executarSJF(processos, true); // Preemptivo
+                    executarSJF(processos, true); 
                     break;
                 case 4:
-                    executarPrioridade(processos, false); // Nao Preemptivo
+                    executarPrioridade(processos, false); 
                     break;
                 case 5:
-                    executarPrioridade(processos, true); // Preemptivo
+                    executarPrioridade(processos, true); 
                     break;
                 case 6:
                     executarRoundRobin(processos);
@@ -83,7 +79,6 @@ int main() {
     return 0;
 }
 
-// --- FUNÇÃO PARA OBTER DADOS DOS PROCESSOS ---
 std::vector<Processo> obterEntradaUsuario() {
     int n;
     std::cout << "Digite o numero de processos: ";
@@ -102,7 +97,6 @@ std::vector<Processo> obterEntradaUsuario() {
     return processos;
 }
 
-// --- FUNÇÃO PARA IMPRIMIR OS RESULTADOS FINAIS ---
 void imprimirResultados(const std::vector<Processo>& processos) {
     float mediaTurnaround = 0.0f;
     float mediaEspera = 0.0f;
@@ -128,16 +122,13 @@ void imprimirResultados(const std::vector<Processo>& processos) {
     std::cout << "Tempo Medio de Espera: " << mediaEspera / processos.size() << std::endl;
 }
 
-// --- IMPLEMENTAÇÃO DOS ALGORITMOS ---
-
-// 1. FCFS (First-Come, First-Served)
 void executarFCFS(std::vector<Processo> processos) {
     std::cout << "\n--- Executando FCFS ---\n";
     int n = processos.size();
     int tempoAtual = 0;
     int processosConcluidos = 0;
     
-    // Ordena os processos por tempo de chegada
+
     std::sort(processos.begin(), processos.end(), [](const Processo& a, const Processo& b) {
         return a.tempoChegada < b.tempoChegada;
     });
@@ -147,7 +138,6 @@ void executarFCFS(std::vector<Processo> processos) {
     for(int i = 0; i < n; ++i) {
         Processo& p = processos[i];
         
-        // Se a CPU estiver ociosa, avança o tempo para a chegada do processo
         if (tempoAtual < p.tempoChegada) {
              std::cout << "Tempo[" << tempoAtual << "-" << p.tempoChegada << "]: CPU Ociosa\n";
              tempoAtual = p.tempoChegada;
@@ -156,7 +146,7 @@ void executarFCFS(std::vector<Processo> processos) {
         std::cout << "Tempo[" << tempoAtual << "]: Processo P" << p.id << " iniciou a execucao.\n";
         
         p.tempoEspera = tempoAtual - p.tempoChegada;
-        tempoAtual += p.tempoExecucao; // Nao preemptivo, executa tudo de uma vez
+        tempoAtual += p.tempoExecucao; 
         p.tempoConclusao = tempoAtual;
         p.tempoTurnaround = p.tempoConclusao - p.tempoChegada;
 
@@ -168,7 +158,6 @@ void executarFCFS(std::vector<Processo> processos) {
     imprimirResultados(processosFinalizados);
 }
 
-// 2. e 3. SJF (Shortest Job First) - Preemptivo e Não Preemptivo
 void executarSJF(std::vector<Processo> processos, bool preemptivo) {
     if (preemptivo) {
         std::cout << "\n--- Executando SJF Preemptivo ---\n";
@@ -183,10 +172,8 @@ void executarSJF(std::vector<Processo> processos, bool preemptivo) {
     std::vector<Processo> processosFinalizados;
     
     while(processosConcluidos < n) {
-        // Adiciona processos que chegaram à fila de prontos
         for (auto& p : processos) {
             if (p.tempoChegada <= tempoAtual && p.tempoRestante > 0) {
-                 // Evita adicionar processos já presentes ou concluídos
                  bool na_fila = false;
                  for(const auto& pronto : filaProntos) if(pronto.id == p.id) na_fila = true;
                  for(const auto& finalizado : processosFinalizados) if(finalizado.id == p.id) na_fila = true;
@@ -203,7 +190,6 @@ void executarSJF(std::vector<Processo> processos, bool preemptivo) {
             continue;
         }
 
-        // Ordena a fila de prontos pelo menor tempo restante/execução
         std::sort(filaProntos.begin(), filaProntos.end(), [](const Processo& a, const Processo& b) {
             return a.tempoRestante < b.tempoRestante;
         });
@@ -217,7 +203,6 @@ void executarSJF(std::vector<Processo> processos, bool preemptivo) {
             
             if (pAtual.tempoRestante == 0) {
                 std::cout << "Tempo[" << tempoAtual << "]: Processo P" << pAtual.id << " concluiu.\n";
-                // Atualiza o processo original na lista 'processos'
                 for(auto& pOrig : processos) {
                     if(pOrig.id == pAtual.id) {
                         pOrig.tempoConclusao = tempoAtual;
@@ -230,7 +215,7 @@ void executarSJF(std::vector<Processo> processos, bool preemptivo) {
                 filaProntos.erase(filaProntos.begin());
                 processosConcluidos++;
             }
-        } else { // Não Preemptivo
+        } else {
              std::cout << "Tempo[" << tempoAtual << "]: Processo P" << pAtual.id << " iniciou a execucao.\n";
              int tempoExecucao = pAtual.tempoExecucao;
              tempoAtual += tempoExecucao;
@@ -254,7 +239,6 @@ void executarSJF(std::vector<Processo> processos, bool preemptivo) {
 }
 
 
-// 4. e 5. Prioridade - Preemptivo e Não Preemptivo
 void executarPrioridade(std::vector<Processo> processos, bool preemptivo) {
      if (preemptivo) {
         std::cout << "\n--- Executando Prioridade Preemptivo ---\n";
@@ -262,7 +246,6 @@ void executarPrioridade(std::vector<Processo> processos, bool preemptivo) {
         std::cout << "\n--- Executando Prioridade Nao Preemptivo ---\n";
     }
 
-    // Solicita as prioridades (menor valor = maior prioridade)
     for(auto& p : processos) {
         std::cout << "Digite a prioridade para o Processo P" << p.id << ": ";
         std::cin >> p.prioridade;
@@ -293,7 +276,6 @@ void executarPrioridade(std::vector<Processo> processos, bool preemptivo) {
             continue;
         }
 
-        // Ordena a fila pela maior prioridade (menor valor)
         std::sort(filaProntos.begin(), filaProntos.end(), [](const Processo& a, const Processo& b) {
             return a.prioridade < b.prioridade;
         });
@@ -319,7 +301,7 @@ void executarPrioridade(std::vector<Processo> processos, bool preemptivo) {
                  filaProntos.erase(filaProntos.begin());
                  processosConcluidos++;
              }
-        } else { // Não Preemptivo
+        } else { 
              std::cout << "Tempo[" << tempoAtual << "]: Processo P" << pAtual.id << " iniciou a execucao (Prioridade: " << pAtual.prioridade << ").\n";
              int tempoExecucao = pAtual.tempoExecucao;
              tempoAtual += tempoExecucao;
@@ -343,7 +325,6 @@ void executarPrioridade(std::vector<Processo> processos, bool preemptivo) {
 }
 
 
-// 6. Round Robin
 void executarRoundRobin(std::vector<Processo> processos) {
     int quantum;
     std::cout << "\n--- Executando Round Robin ---\n";
@@ -353,10 +334,9 @@ void executarRoundRobin(std::vector<Processo> processos) {
     int n = processos.size();
     int tempoAtual = 0;
     int processosConcluidos = 0;
-    std::vector<int> filaProntos; // Fila de IDs de processos
+    std::vector<int> filaProntos;
     std::vector<bool> naFila(n + 1, false);
     
-    // Ordena processos por chegada para facilitar a entrada na fila
     std::sort(processos.begin(), processos.end(), [](const Processo& a, const Processo& b) {
         return a.tempoChegada < b.tempoChegada;
     });
@@ -364,7 +344,6 @@ void executarRoundRobin(std::vector<Processo> processos) {
     int proxProcessoIdx = 0;
 
     while (processosConcluidos < n) {
-        // Adiciona processos que chegaram na fila de prontos
         while (proxProcessoIdx < n && processos[proxProcessoIdx].tempoChegada <= tempoAtual) {
             if (!naFila[processos[proxProcessoIdx].id]) {
                 filaProntos.push_back(proxProcessoIdx);
@@ -390,7 +369,6 @@ void executarRoundRobin(std::vector<Processo> processos) {
         tempoAtual += tempoExecutar;
         pAtual.tempoRestante -= tempoExecutar;
 
-        // Adiciona novos processos que possam ter chegado DURANTE a execução do quantum
         while (proxProcessoIdx < n && processos[proxProcessoIdx].tempoChegada <= tempoAtual) {
             if (!naFila[processos[proxProcessoIdx].id]) {
                 filaProntos.push_back(proxProcessoIdx);
@@ -407,10 +385,10 @@ void executarRoundRobin(std::vector<Processo> processos) {
             pAtual.tempoTurnaround = pAtual.tempoConclusao - pAtual.tempoChegada;
             pAtual.tempoEspera = pAtual.tempoTurnaround - pAtual.tempoExecucao;
             processosConcluidos++;
-            naFila[pAtual.id] = false; // Não está mais na fila
+            naFila[pAtual.id] = false; 
         } else {
              std::cout << "Tempo[" << tempoAtual << "]: Processo P" << pAtual.id << " foi preemptado (restam " << pAtual.tempoRestante << "ms) e voltou para o fim da fila.\n";
-            filaProntos.push_back(pIdx); // Volta para o final da fila
+            filaProntos.push_back(pIdx); 
         }
     }
     imprimirResultados(processos);
